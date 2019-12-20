@@ -64,7 +64,8 @@ open class NodeJsRootExtension(val rootProject: Project) {
             val platform = NodeJsPlatform.name
             val architecture = NodeJsPlatform.architecture
 
-            val nodeDir = installationDir.resolve("node-v$nodeVersion-$platform-$architecture")
+            val nodeDirName = "node-v$nodeVersion-$platform-$architecture"
+            val nodeDir = installationDir.resolve(nodeDirName)
             val isWindows = NodeJsPlatform.name == NodeJsPlatform.WIN
             val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")
 
@@ -77,6 +78,8 @@ open class NodeJsRootExtension(val rootProject: Project) {
                 val type = if (isWindows) "zip" else "tar.gz"
                 return "org.nodejs:node:$nodeVersion:$platform-$architecture@$type"
             }
+
+            addAccessFile(installationDir, nodeDirName)
 
             return NodeJsEnv(
                 nodeDir = nodeDir,
@@ -102,5 +105,12 @@ open class NodeJsRootExtension(val rootProject: Project) {
 
     companion object {
         const val EXTENSION_NAME: String = "kotlinNodeJs"
+    }
+
+    fun addAccessFile(path: File, version: String) {
+        val fileName = "$version-access"
+
+        val accessFile = File(path, fileName)
+        accessFile.createNewFile()
     }
 }
