@@ -5,12 +5,14 @@ plugins {
     id "org.jetbrains.kotlin.js" version "<pluginMarkerVersion>"
 }
 
+String nodeJsVersion
+
 tasks.create("checkAccessFile") {
     description = "updated access file last modified date"
     dependsOn "build"
     doLast {
         println("check access file existance")
-        def accessFile = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v10.15.3-darwin-x64-access")
+        def accessFile = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64-access")
         if (!accessFile.exists()) {
             throw new InvalidUserDataException("Access file was not found")
         }
@@ -28,12 +30,12 @@ tasks.create("testCleanTask") {
     description = "check clean task behaviour"
     doLast {
         println("check deletion of access file and folder")
-        def accessFile = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v10.15.3-darwin-x64-access")
+        def accessFile = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64-access")
         if (accessFile.exists()) {
             throw new InvalidUserDataException("Access file was not deleted")
         }
 
-        def dependencyDir = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v10.15.3-darwin-x64")
+        def dependencyDir = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64")
         if (dependencyDir.exists()) {
             throw new InvalidUserDataException("Folder was not deleted")
         }
@@ -49,6 +51,8 @@ afterEvaluate {
     project.kotlinNodeJs.nodeVersion = "10.15.3"
     project.tasks.nodeKotlinClean.dependsOn(checkAccessFile)
     project.tasks.testCleanTask.dependsOn(nodeKotlinClean)
+    nodeJsVersion = project.extensions.getByName("kotlinNodeJs").nodeVersion
+    println("Node js version: $nodeJsVersion")
 }
 
 dependencies {

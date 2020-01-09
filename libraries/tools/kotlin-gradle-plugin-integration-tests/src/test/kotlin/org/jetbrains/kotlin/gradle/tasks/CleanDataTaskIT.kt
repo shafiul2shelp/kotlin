@@ -12,6 +12,7 @@ import org.junit.Test
 
 
 class CleanDataTaskIT : BaseGradleIT() {
+
     override val defaultGradleVersion: GradleVersionRequired
         get() = GradleVersionRequired.AtLeast("5.5.1")
 
@@ -19,8 +20,7 @@ class CleanDataTaskIT : BaseGradleIT() {
     fun testAccessFileAndFolderDeletion() {
         val project = transformProjectWithPluginsDsl("cleanTask")
 
-
-        project.build("build") {
+        project.build("testCleanTask") {
             assertSuccessful()
         }
 

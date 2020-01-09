@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.tasks.CleanManager
 
 open class YarnRootExtension(val project: Project) {
     init {
@@ -19,6 +20,7 @@ open class YarnRootExtension(val project: Project) {
     }
 
     var installationDir = gradleHome.resolve("yarn")
+    var cleanDataProvider = CleanManager.registerDir(installationDir.path)
 
     var downloadBaseUrl = "https://github.com/yarnpkg/yarn/releases/download"
     var version = "1.21.1"
@@ -38,6 +40,7 @@ open class YarnRootExtension(val project: Project) {
         if (!env.home.isDirectory) {
             yarnSetupTask.setup()
         }
+        cleanDataProvider.markAsReadByPath(env.home.absolutePath)
     }
 
     internal val environment

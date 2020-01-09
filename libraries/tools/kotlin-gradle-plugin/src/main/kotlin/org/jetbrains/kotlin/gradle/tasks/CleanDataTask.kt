@@ -8,45 +8,35 @@ package org.jetbrains.kotlin.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import java.io.File
-import java.nio.file.Files
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.Duration
+import java.time.Instant
 
+/**
+ * Task to clean all old loaded files based on a date of special access file.
+ * The access file should be updated every time when loaded files are used
+ */
 open class CleanDataTask : DefaultTask() {
 
+    /**
+     * Path to folder.
+     * Use path instead of file to avoid file scanning for change check
+     */
     @Input
     lateinit var installationDirPath: String
 
-    private val accessFileSuffix = "-access"
-
+    /**
+     * Time to live in days
+     */
     @Input
-    var ttl: Long = 30
+    var timeToLiveInDays: Long = 30
 
     @Suppress("unused")
     @TaskAction
     fun exec() {
-        val expirationDate = LocalDate.now().minusDays(ttl)
-        val dir = File(installationDirPath)
+        val expirationDate = Instant.now().minus(Duration.ofDays(timeToLiveInDays))
 
-        fun modificationDate(file: File): LocalDate {
-            val lastModifiedTime = Files.getLastModifiedTime(file.toPath())
-            return lastModifiedTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-        }
-
-        fun getAllLinkedFileNames(accessFileName: String): List<String> {
-            return listOf(accessFileName, accessFileName.removeSuffix(accessFileSuffix))
-        }
-
-        val filesInDirByName = dir.listFiles()?.map { it.name to it }?.toMap()
-
-        filesInDirByName
-            ?.filter { (fileName, file) ->
-                file.isFile && fileName.endsWith(accessFileSuffix)
-                        && modificationDate(file).isBefore(expirationDate)
-            }
-            ?.flatMap { (filename, _) -> getAllLinkedFileNames(filename) }
-            ?.forEach { fileName -> filesInDirByName[fileName]?.deleteRecursively()!! }
+        val cleanDataProvider = CleanManager.registerDir(installationDirPath)
+        cleanDataProvider.cleanDir(expirationDate)
 
     }
 

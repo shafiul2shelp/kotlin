@@ -55,6 +55,7 @@ open class YarnSetupTask : DefaultTask() {
                 fileCopy.path = fileCopy.path.removePrefix(dirInTar)
             }
         }
+        settings.cleanDataProvider.markAsRead(dirInTar)
     }
 
     companion object {
