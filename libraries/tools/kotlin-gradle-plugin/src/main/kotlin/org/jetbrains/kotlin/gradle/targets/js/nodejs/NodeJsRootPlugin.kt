@@ -29,7 +29,7 @@ open class NodeJsRootPlugin : Plugin<Project> {
         }
 
         tasks.create("node" + CleanDataTask.NAME, CleanDataTask::class.java) {
-            it.installationDirPath = settings.installationDir.canonicalPath
+            it.cleanableStore = settings.cleanableStore
             it.group = TASKS_GROUP_NAME
             it.description = "Clean unused local node version"
         }

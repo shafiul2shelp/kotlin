@@ -23,7 +23,7 @@ open class YarnSetupTask : DefaultTask() {
 
     @Suppress("MemberVisibilityCanBePrivate")
     val destination: File
-        @OutputDirectory get() = env.home
+        @OutputDirectory get() = env.home.file
 
     init {
         group = NodeJsRootPlugin.TASKS_GROUP_NAME
@@ -55,7 +55,6 @@ open class YarnSetupTask : DefaultTask() {
                 fileCopy.path = fileCopy.path.removePrefix(dirInTar)
             }
         }
-        settings.cleanDataProvider.markAsRead(dirInTar)
     }
 
     companion object {

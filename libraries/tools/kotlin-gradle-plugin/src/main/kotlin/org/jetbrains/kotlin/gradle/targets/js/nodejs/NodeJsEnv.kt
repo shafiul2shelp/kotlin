@@ -1,9 +1,10 @@
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
+import org.jetbrains.kotlin.gradle.tasks.DownloadedFile
 import java.io.File
 
 internal data class NodeJsEnv(
-    val nodeDir: File,
+    val nodeDir: DownloadedFile,
     val nodeBinDir: File,
     val nodeExecutable: String,
 

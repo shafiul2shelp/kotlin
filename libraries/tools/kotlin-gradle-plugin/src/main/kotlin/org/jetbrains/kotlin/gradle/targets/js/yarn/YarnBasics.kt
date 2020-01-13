@@ -30,13 +30,12 @@ abstract class YarnBasics : NpmApi {
 
         project.execWithProgress(description) { exec ->
             exec.executable = nodeJsEnv.nodeExecutable
-            exec.args = listOf(yarnEnv.home.resolve("bin/yarn.js").absolutePath) +
+            exec.args = listOf(yarnEnv.home.file.resolve("bin/yarn.js").absolutePath) +
                     args +
                     if (project.logger.isDebugEnabled) "--verbose" else ""
             exec.workingDir = dir
         }
 
-        yarnPlugin.cleanDataProvider.markAsReadByPath(yarnEnv.home.absolutePath)
     }
 
     protected fun yarnLockReadTransitiveDependencies(

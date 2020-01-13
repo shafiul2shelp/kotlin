@@ -22,7 +22,7 @@ open class CleanDataTask : DefaultTask() {
      * Use path instead of file to avoid file scanning for change check
      */
     @Input
-    lateinit var installationDirPath: String
+    lateinit var cleanableStore: CleanableStore
 
     /**
      * Time to live in days
@@ -35,8 +35,7 @@ open class CleanDataTask : DefaultTask() {
     fun exec() {
         val expirationDate = Instant.now().minus(Duration.ofDays(timeToLiveInDays))
 
-        val cleanDataProvider = CleanManager.registerDir(installationDirPath)
-        cleanDataProvider.cleanDir(expirationDate)
+        cleanableStore.cleanDir(expirationDate)
 
     }
 

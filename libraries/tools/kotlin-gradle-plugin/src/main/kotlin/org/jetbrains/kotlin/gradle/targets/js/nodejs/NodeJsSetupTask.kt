@@ -1,7 +1,6 @@
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.artifacts.repositories.IvyPatternRepositoryLayout
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -19,7 +18,7 @@ open class NodeJsSetupTask : DefaultTask() {
         @Input get() = env.ivyDependency
 
     val destination: File
-        @OutputDirectory get() = env.nodeDir
+        @OutputDirectory get() = env.nodeDir.file
 
     init {
         @Suppress("LeakingThis")

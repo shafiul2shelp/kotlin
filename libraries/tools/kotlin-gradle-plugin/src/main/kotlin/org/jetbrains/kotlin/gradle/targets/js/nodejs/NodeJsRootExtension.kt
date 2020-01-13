@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmApi
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.Yarn
-import org.jetbrains.kotlin.gradle.tasks.CleanManager
+import org.jetbrains.kotlin.gradle.tasks.CleanableStore
 import java.io.File
 
 open class NodeJsRootExtension(val rootProject: Project) {
@@ -21,7 +21,7 @@ open class NodeJsRootExtension(val rootProject: Project) {
     }
 
     var installationDir = gradleHome.resolve("nodejs")
-    var cleanDataProvider = CleanManager.registerDir(installationDir.absolutePath)
+    var cleanableStore = CleanableStore[installationDir.absolutePath]
 
     var download = true
     var nodeDownloadBaseUrl = "https://nodejs.org/dist"
@@ -67,9 +67,9 @@ open class NodeJsRootExtension(val rootProject: Project) {
             val architecture = NodeJsPlatform.architecture
 
             val nodeDirName = "node-v$nodeVersion-$platform-$architecture"
-            val nodeDir = installationDir.resolve(nodeDirName)
+            val nodeDir = cleanableStore[nodeDirName]
             val isWindows = NodeJsPlatform.name == NodeJsPlatform.WIN
-            val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")
+            val nodeBinDir = if (isWindows) nodeDir.file else nodeDir.file.resolve("bin")
 
             fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
                 val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
@@ -80,8 +80,6 @@ open class NodeJsRootExtension(val rootProject: Project) {
                 val type = if (isWindows) "zip" else "tar.gz"
                 return "org.nodejs:node:$nodeVersion:$platform-$architecture@$type"
             }
-
-            cleanDataProvider.markAsRead(nodeDirName)
 
             return NodeJsEnv(
                 nodeDir = nodeDir,

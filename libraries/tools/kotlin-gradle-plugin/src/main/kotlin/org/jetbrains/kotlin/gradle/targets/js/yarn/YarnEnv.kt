@@ -5,9 +5,9 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
-import java.io.File
+import org.jetbrains.kotlin.gradle.tasks.DownloadedFile
 
 internal data class YarnEnv(
     val downloadUrl: String,
-    val home: File
+    val home: DownloadedFile
 )
