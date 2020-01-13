@@ -17,7 +17,7 @@ class CleanDataTaskIT : BaseGradleIT() {
         get() = GradleVersionRequired.AtLeast("5.5.1")
 
     @Test
-    fun testAccessFileAndFolderDeletion() {
+    fun testDownloadedFolderDeletion() {
         val project = transformProjectWithPluginsDsl("cleanTask")
 
         project.build("testCleanTask") {

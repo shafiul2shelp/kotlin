@@ -7,19 +7,19 @@ plugins {
 
 String nodeJsVersion
 
-tasks.create("checkAccessFile") {
-    description = "updated access file last modified date"
+tasks.create("checkDownloadedFolder") {
+    description = "updated last modified date for downloaded folder"
     dependsOn "build"
     doLast {
-        println("check access file existance")
-        def accessFile = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64-access")
-        if (!accessFile.exists()) {
-            throw new InvalidUserDataException("Access file was not found")
+        println("check downloaded folder existance")
+        def downloadedFolder = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64")
+        if (!downloadedFolder.exists() || !downloadedFolder.isDirectory()) {
+            throw new InvalidUserDataException("Downloaded folder was not found")
         }
         println("try to update lastModifiedDate")
-        println(accessFile.lastModified())
-        def successUpdated = accessFile.setLastModified(LocalDateTime.now().minusDays(35).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-        println(accessFile.lastModified())
+        println(downloadedFolder.lastModified())
+        def successUpdated = downloadedFolder.setLastModified(LocalDateTime.now().minusDays(35).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        println(downloadedFolder.lastModified())
         if (!successUpdated) {
             throw new InvalidUserDataException("Unable to update last modified date")
         }
@@ -29,14 +29,9 @@ tasks.create("checkAccessFile") {
 tasks.create("testCleanTask") {
     description = "check clean task behaviour"
     doLast {
-        println("check deletion of access file and folder")
-        def accessFile = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64-access")
-        if (accessFile.exists()) {
-            throw new InvalidUserDataException("Access file was not deleted")
-        }
-
-        def dependencyDir = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64")
-        if (dependencyDir.exists()) {
+        println("check deletion of downloaded folder")
+        def downloadedFolder = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64")
+        if (downloadedFolder.exists()) {
             throw new InvalidUserDataException("Folder was not deleted")
         }
     }
@@ -49,7 +44,7 @@ repositories {
 
 afterEvaluate {
     project.kotlinNodeJs.nodeVersion = "10.15.3"
-    project.tasks.nodeKotlinClean.dependsOn(checkAccessFile)
+    project.tasks.nodeKotlinClean.dependsOn(checkDownloadedFolder)
     project.tasks.testCleanTask.dependsOn(nodeKotlinClean)
     nodeJsVersion = project.extensions.getByName("kotlinNodeJs").nodeVersion
     println("Node js version: $nodeJsVersion")
