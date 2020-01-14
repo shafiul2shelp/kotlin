@@ -8,7 +8,7 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
-import org.jetbrains.kotlin.gradle.tasks.CleanableStore
+import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 
 open class YarnRootExtension(val project: Project) {
     init {

@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import java.time.Duration
 import java.time.Instant
 

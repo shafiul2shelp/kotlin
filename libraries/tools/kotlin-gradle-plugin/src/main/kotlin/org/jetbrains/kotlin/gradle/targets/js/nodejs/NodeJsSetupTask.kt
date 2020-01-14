@@ -23,7 +23,7 @@ open class NodeJsSetupTask : DefaultTask() {
     init {
         @Suppress("LeakingThis")
         onlyIf {
-            settings.download && !env.nodeBinDir.isDirectory
+            settings.download && !env.nodeBinDir.file.isDirectory
         }
     }
 

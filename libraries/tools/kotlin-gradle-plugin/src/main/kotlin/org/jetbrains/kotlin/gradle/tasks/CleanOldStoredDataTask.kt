@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import java.time.*
 
 /**
@@ -27,7 +28,7 @@ class CleanOldStoredDataTask : DefaultTask() {
     fun exec() {
         val expirationDate = Instant.now().minus(Duration.ofDays(timeToLiveInDays))
 
-        CleanableStore.cleanableStores.forEach { (_, store) -> store.cleanDir(expirationDate) }
+        CleanableStore.getStores().forEach { (_, store) -> store.cleanDir(expirationDate) }
 
     }
 

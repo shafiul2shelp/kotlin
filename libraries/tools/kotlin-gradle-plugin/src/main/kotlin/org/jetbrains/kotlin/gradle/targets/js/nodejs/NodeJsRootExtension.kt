@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmApi
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.Yarn
-import org.jetbrains.kotlin.gradle.tasks.CleanableStore
+import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import java.io.File
 
 open class NodeJsRootExtension(val rootProject: Project) {
@@ -69,11 +69,11 @@ open class NodeJsRootExtension(val rootProject: Project) {
             val nodeDirName = "node-v$nodeVersion-$platform-$architecture"
             val nodeDir = cleanableStore[nodeDirName]
             val isWindows = NodeJsPlatform.name == NodeJsPlatform.WIN
-            val nodeBinDir = if (isWindows) nodeDir.file else nodeDir.file.resolve("bin")
+            val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")
 
             fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
                 val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
-                return if (download) File(nodeBinDir, finalCommand).absolutePath else finalCommand
+                return if (download) File(nodeBinDir.file, finalCommand).absolutePath else finalCommand
             }
 
             fun getIvyDependency(): String {
@@ -94,7 +94,7 @@ open class NodeJsRootExtension(val rootProject: Project) {
     internal fun executeSetup() {
         val nodeJsEnv = environment
         if (download) {
-            if (!nodeJsEnv.nodeBinDir.isDirectory) {
+            if (!nodeJsEnv.nodeBinDir.file.isDirectory) {
                 nodeJsSetupTask.exec()
             }
         }

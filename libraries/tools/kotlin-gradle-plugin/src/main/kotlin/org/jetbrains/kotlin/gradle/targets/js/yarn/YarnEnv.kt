@@ -5,7 +5,7 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
-import org.jetbrains.kotlin.gradle.tasks.DownloadedFile
+import org.jetbrains.kotlin.gradle.tasks.internal.DownloadedFile
 
 internal data class YarnEnv(
     val downloadUrl: String,
