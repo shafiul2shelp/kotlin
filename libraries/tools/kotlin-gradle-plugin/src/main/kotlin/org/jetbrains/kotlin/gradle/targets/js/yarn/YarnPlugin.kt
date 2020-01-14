@@ -19,14 +19,14 @@ open class YarnPlugin : Plugin<Project> {
 
         val nodeJs = NodeJsRootPlugin.apply(this)
 
-        this.extensions.create(YarnRootExtension.YARN, YarnRootExtension::class.java, this)
+        val yarnRootExtension = this.extensions.create(YarnRootExtension.YARN, YarnRootExtension::class.java, this)
 
-        val yarnSetupTask = tasks.create(YarnSetupTask.NAME, YarnSetupTask::class.java) {
+        tasks.create(YarnSetupTask.NAME, YarnSetupTask::class.java) {
             it.dependsOn(nodeJs.nodeJsSetupTask)
         }
 
         tasks.create("yarn" + CleanDataTask.NAME, CleanDataTask::class.java) {
-            it.cleanableStore = CleanableStore[yarnSetupTask.destination.parent]
+            it.cleanableStore = yarnRootExtension.cleanableStore
             it.description = "Clean unused local yarn version"
         }
     }
