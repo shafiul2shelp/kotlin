@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlatform
+
 import java.io.File
 import java.time.*
 
@@ -6,13 +8,14 @@ plugins {
 }
 
 String nodeJsVersion
+String nodeJsLocation
 
 tasks.create("checkDownloadedFolder") {
     description = "updated last modified date for downloaded folder"
     dependsOn "build"
     doLast {
         println("check downloaded folder existance")
-        def downloadedFolder = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64")
+        def downloadedFolder = new File(project.gradle.gradleUserHomeDir, nodeJsLocation)
         if (!downloadedFolder.exists() || !downloadedFolder.isDirectory()) {
             throw new InvalidUserDataException("Downloaded folder was not found")
         }
@@ -30,7 +33,7 @@ tasks.create("testCleanTask") {
     description = "check clean task behaviour"
     doLast {
         println("check deletion of downloaded folder")
-        def downloadedFolder = new File(project.gradle.gradleUserHomeDir, "/nodejs/node-v$nodeJsVersion-darwin-x64")
+        def downloadedFolder = new File(project.gradle.gradleUserHomeDir, nodeJsLocation)
         if (downloadedFolder.exists()) {
             throw new InvalidUserDataException("Folder was not deleted")
         }
@@ -44,10 +47,18 @@ repositories {
 
 afterEvaluate {
     project.kotlinNodeJs.nodeVersion = "10.15.3"
+
     project.tasks.nodeKotlinClean.dependsOn(checkDownloadedFolder)
     project.tasks.testCleanTask.dependsOn(nodeKotlinClean)
+
     nodeJsVersion = project.extensions.getByName("kotlinNodeJs").nodeVersion
     println("Node js version: $nodeJsVersion")
+
+    String platform = NodeJsPlatform.name
+    String architecture = NodeJsPlatform.architecture
+
+    nodeJsLocation = "/nodejs/node-v$nodeJsVersion-$platform-$architecture"
+    println("Use $nodeJsLocation location")
 }
 
 dependencies {

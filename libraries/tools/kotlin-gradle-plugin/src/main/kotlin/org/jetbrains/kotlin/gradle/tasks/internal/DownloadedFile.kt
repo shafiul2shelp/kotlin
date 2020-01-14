@@ -27,12 +27,12 @@ internal class DownloadedFileImpl( private val _file: File) : DownloadedFile {
 
     private var dir: File = _file
 
-    private constructor(_dir: File, _file: File) : this(_file) {
+    private constructor( _file: File, _dir: File) : this(_file) {
         this.dir = _dir
     }
 
     override fun resolve(fileName: String): DownloadedFile {
-        return DownloadedFileImpl(dir, file.resolve(fileName))
+        return DownloadedFileImpl(file.resolve(fileName), dir)
     }
 
 }
