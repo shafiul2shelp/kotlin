@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2019 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
@@ -35,10 +35,10 @@ import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 class TrailingCommaPostFormatProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement =
-        TrailingCommaVisitor(settings).process(source)
+        TrailingCommaPostFormatVisitor(settings).process(source)
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange =
-        TrailingCommaVisitor(settings).processText(source, rangeToReformat)
+        TrailingCommaPostFormatVisitor(settings).processText(source, rangeToReformat)
 
     companion object {
         fun findInvalidCommas(commaOwner: KtElement): List<PsiElement> = commaOwner.firstChild?.siblings(withItself = false)?.mapNotNull {
@@ -78,51 +78,11 @@ class TrailingCommaPostFormatProcessor : PostFormatProcessor {
     }
 }
 
-private fun trailingCommaAllowedInModule(source: PsiElement): Boolean =
-    Registry.`is`("kotlin.formatter.allowTrailingCommaInAnyProject", false) ||
-            source.module?.languageVersionSettings?.supportsFeature(LanguageFeature.TrailingCommas) == true
-
-private fun postFormatIsEnable(source: PsiElement): Boolean = !PostprocessReformattingAspect.getInstance(source.project).isDisabled
-
-private class TrailingCommaVisitor(val settings: CodeStyleSettings) : KtTreeVisitorVoid() {
+private class TrailingCommaPostFormatVisitor(val settings: CodeStyleSettings) : TrailingCommaVisitor() {
     private val myPostProcessor = PostFormatProcessorHelper(settings.kotlinCommonSettings)
 
-    override fun visitParameterList(list: KtParameterList) = processCommaOwnerIfInRange(list) {
-        super.visitParameterList(list)
-    }
-
-    override fun visitValueArgumentList(list: KtValueArgumentList) = processCommaOwnerIfInRange(list) {
-        super.visitValueArgumentList(list)
-    }
-
-    override fun visitArrayAccessExpression(expression: KtArrayAccessExpression) = processCommaOwnerIfInRange(expression.indicesNode) {
-        super.visitArrayAccessExpression(expression)
-    }
-
-    override fun visitTypeParameterList(list: KtTypeParameterList) = processCommaOwnerIfInRange(list) {
-        super.visitTypeParameterList(list)
-    }
-
-    override fun visitTypeArgumentList(typeArgumentList: KtTypeArgumentList) = processCommaOwnerIfInRange(typeArgumentList) {
-        super.visitTypeArgumentList(typeArgumentList)
-    }
-
-    override fun visitCollectionLiteralExpression(expression: KtCollectionLiteralExpression) = processCommaOwnerIfInRange(expression) {
-        super.visitCollectionLiteralExpression(expression)
-    }
-
-    override fun visitWhenEntry(jetWhenEntry: KtWhenEntry) = processCommaOwnerIfInRange(jetWhenEntry) {
-        super.visitWhenEntry(jetWhenEntry)
-    }
-
-    override fun visitDestructuringDeclaration(destructuringDeclaration: KtDestructuringDeclaration) =
-        processCommaOwnerIfInRange(destructuringDeclaration) {
-            super.visitDestructuringDeclaration(destructuringDeclaration)
-        }
-
-    private fun processCommaOwnerIfInRange(element: KtElement, preHook: () -> Unit = {}) = processIfInRange(element) {
-        preHook()
-        processCommaOwner(element)
+    override fun process(commaOwner: KtElement) = processIfInRange(commaOwner) {
+        processCommaOwner(commaOwner)
     }
 
     private fun processIfInRange(element: KtElement, block: () -> Unit = {}) {
@@ -193,6 +153,12 @@ private class TrailingCommaVisitor(val settings: CodeStyleSettings) : KtTreeVisi
         private val LOG = Logger.getInstance(TrailingCommaVisitor::class.java)
     }
 }
+
+private fun trailingCommaAllowedInModule(source: PsiElement): Boolean =
+    Registry.`is`("kotlin.formatter.allowTrailingCommaInAnyProject", false) ||
+            source.module?.languageVersionSettings?.supportsFeature(LanguageFeature.TrailingCommas) == true
+
+private fun postFormatIsEnable(source: PsiElement): Boolean = !PostprocessReformattingAspect.getInstance(source.project).isDisabled
 
 private fun PsiElement.addCommaAfter(factory: KtPsiFactory) {
     val comma = factory.createComma()
