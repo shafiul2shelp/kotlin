@@ -23,7 +23,7 @@ open class YarnSetupTask : DefaultTask() {
 
     @Suppress("MemberVisibilityCanBePrivate")
     val destination: File
-        @OutputDirectory get() = env.home.use()
+        @OutputDirectory get() = env.home
 
     init {
         group = NodeJsRootPlugin.TASKS_GROUP_NAME

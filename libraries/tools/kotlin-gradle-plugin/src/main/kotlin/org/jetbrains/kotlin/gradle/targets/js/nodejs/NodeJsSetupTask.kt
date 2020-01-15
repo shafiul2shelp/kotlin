@@ -18,12 +18,12 @@ open class NodeJsSetupTask : DefaultTask() {
         @Input get() = env.ivyDependency
 
     val destination: File
-        @OutputDirectory get() = env.nodeDir.use()
+        @OutputDirectory get() = env.nodeDir
 
     init {
         @Suppress("LeakingThis")
         onlyIf {
-            settings.download && !env.nodeBinDir.use().isDirectory
+            settings.download && !env.nodeBinDir.isDirectory
         }
     }
 
