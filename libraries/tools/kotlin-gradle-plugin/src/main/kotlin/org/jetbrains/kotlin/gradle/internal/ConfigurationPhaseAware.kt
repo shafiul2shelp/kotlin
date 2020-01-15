@@ -5,26 +5,33 @@
 
 package org.jetbrains.kotlin.gradle.internal
 
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import kotlin.reflect.KProperty
 
-open class ConfigurationPhaseAware {
-    private var built = false
+abstract class ConfigurationPhaseAware<C: Any> {
 
-    protected fun markBuilt() {
-        built = true
+    private var configured: C? = null
+
+    @Synchronized
+    public fun requireConfigured(): C {
+        if (configured == null) {
+            configured = finalizeConfiguration()
+        }
+
+        return configured!!
     }
 
-    protected fun requireNotBuilt() {
-        check(!built) { "environment already built for previous property values" }
+    protected fun requireNotConfigured() {
+        check(configured == null) { "Configuration already finalized for previous property values" }
     }
 
     inner class Property<T>(var value: T) {
         operator fun getValue(receiver: Any, property: KProperty<*>): T = value
 
         operator fun setValue(receiver: Any, property: KProperty<*>, value: T) {
-            requireNotBuilt()
+            requireNotConfigured()
             this.value = value
         }
     }
+
+    protected abstract fun finalizeConfiguration(): C
 }

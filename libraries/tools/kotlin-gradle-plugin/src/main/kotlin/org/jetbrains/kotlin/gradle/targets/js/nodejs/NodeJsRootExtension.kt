@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.Yarn
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import java.io.File
 
-open class NodeJsRootExtension(val rootProject: Project) : ConfigurationPhaseAware() {
+open class NodeJsRootExtension(val rootProject: Project) : ConfigurationPhaseAware<NodeJsEnv>() {
     init {
         check(rootProject.rootProject == rootProject)
     }
@@ -62,14 +62,13 @@ open class NodeJsRootExtension(val rootProject: Project) : ConfigurationPhaseAwa
     val nodeModulesGradleCacheDir: File
         get() = rootPackageDir.resolve("packages_imported")
 
-    internal val environment: NodeJsEnv by lazy {
-        markBuilt()
-
+    override fun finalizeConfiguration(): NodeJsEnv {
         val platform = NodeJsPlatform.name
         val architecture = NodeJsPlatform.architecture
 
         val nodeDirName = "node-v$nodeVersion-$platform-$architecture"
-        val nodeDir = CleanableStore[installationDir.absolutePath][nodeDirName].use()
+        val cleanableStore = CleanableStore[installationDir.absolutePath]
+        val nodeDir = cleanableStore[nodeDirName].use()
         val isWindows = NodeJsPlatform.name == NodeJsPlatform.WIN
         val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")
 
@@ -83,7 +82,8 @@ open class NodeJsRootExtension(val rootProject: Project) : ConfigurationPhaseAwa
             return "org.nodejs:node:$nodeVersion:$platform-$architecture@$type"
         }
 
-        NodeJsEnv(
+        return NodeJsEnv(
+            cleanableStore = cleanableStore,
             nodeDir = nodeDir,
             nodeBinDir = nodeBinDir,
             nodeExecutable = getExecutable("node", nodeCommand, "exe"),
@@ -94,7 +94,7 @@ open class NodeJsRootExtension(val rootProject: Project) : ConfigurationPhaseAwa
     }
 
     internal fun executeSetup() {
-        val nodeJsEnv = environment
+        val nodeJsEnv = requireConfigured()
         if (download) {
             if (!nodeJsEnv.nodeBinDir.isDirectory) {
                 nodeJsSetupTask.exec()

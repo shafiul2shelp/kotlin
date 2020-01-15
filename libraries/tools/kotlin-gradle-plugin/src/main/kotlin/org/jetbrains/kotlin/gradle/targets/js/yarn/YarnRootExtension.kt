@@ -33,14 +33,16 @@ open class YarnRootExtension(val project: Project) : ConfigurationPhaseAware() {
     val useWorkspaces: Boolean
         get() = !disableWorkspaces
 
-    internal val environment: YarnEnv
-        get() {
-            markBuilt()
-            return YarnEnv(
-                downloadUrl = "$downloadBaseUrl/v$version/yarn-v$version.tar.gz",
-                home = CleanableStore[installationDir.path]["yarn-v$version"].use()
-            )
-        }
+    internal lateinit var environment: YarnEnv
+
+    override fun finalizeConfiguration() {
+        super.finalizeConfiguration()
+
+        environment = YarnEnv(
+            downloadUrl = "$downloadBaseUrl/v$version/yarn-v$version.tar.gz",
+            home = CleanableStore[installationDir.path]["yarn-v$version"].use()
+        )
+    }
 
     internal fun executeSetup() {
         NodeJsRootPlugin.apply(project).executeSetup()
