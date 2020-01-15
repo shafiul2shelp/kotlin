@@ -1,6 +1,7 @@
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.internal.ConfigurationPhaseAware
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.targets.js.NpmVersions
@@ -10,30 +11,14 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.Yarn
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import java.io.File
-import kotlin.reflect.KProperty
 
-open class NodeJsRootExtension(val rootProject: Project) {
+open class NodeJsRootExtension(val rootProject: Project) : ConfigurationPhaseAware() {
     init {
         check(rootProject.rootProject == rootProject)
     }
 
     private val gradleHome = rootProject.gradle.gradleUserHomeDir.also {
         rootProject.logger.kotlinInfo("Storing cached files in $it")
-    }
-
-    private var built = false
-
-    private fun requireNotBuilt() {
-        check(!built) { "environment already built for previous property values" }
-    }
-
-    inner class Property<T>(var value: T) {
-        operator fun getValue(receiver: NodeJsRootExtension, property: KProperty<*>): T = value
-
-        operator fun setValue(receiver: NodeJsRootExtension, property: KProperty<*>, value: T) {
-            requireNotBuilt()
-            this.value = value
-        }
     }
 
     var installationDir by Property(gradleHome.resolve("nodejs"))
@@ -78,7 +63,7 @@ open class NodeJsRootExtension(val rootProject: Project) {
         get() = rootPackageDir.resolve("packages_imported")
 
     internal val environment: NodeJsEnv by lazy {
-        built = true
+        markBuilt()
 
         val platform = NodeJsPlatform.name
         val architecture = NodeJsPlatform.architecture
