@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.Yarn
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import java.io.File
+import kotlin.reflect.KProperty
 
 open class NodeJsRootExtension(val rootProject: Project) {
     init {
@@ -20,16 +21,31 @@ open class NodeJsRootExtension(val rootProject: Project) {
         rootProject.logger.kotlinInfo("Storing cached files in $it")
     }
 
-    var installationDir = gradleHome.resolve("nodejs")
-    var cleanableStore = CleanableStore[installationDir.absolutePath]
+    private var built = false
 
-    var download = true
-    var nodeDownloadBaseUrl = "https://nodejs.org/dist"
-    var nodeVersion = "12.14.0"
+    private fun requireNotBuilt() {
+        check(!built) { "environment already built for previous property values" }
+    }
 
-    var nodeCommand = "node"
+    inner class Property<T>(var value: T) {
+        operator fun getValue(receiver: NodeJsRootExtension, property: KProperty<*>): T = value
 
-    var packageManager: NpmApi = Yarn
+        operator fun setValue(receiver: NodeJsRootExtension, property: KProperty<*>, value: T) {
+            requireNotBuilt()
+            this.value = value
+        }
+    }
+
+    var installationDir by Property(gradleHome.resolve("nodejs"))
+
+    var download by Property(true)
+
+    var nodeDownloadBaseUrl by Property("https://nodejs.org/dist")
+    var nodeVersion by Property("12.14.0")
+
+    var nodeCommand by Property("node")
+
+    var packageManager: NpmApi by Property(Yarn)
 
     private val projectProperties = PropertiesProvider(rootProject)
 
@@ -61,35 +77,36 @@ open class NodeJsRootExtension(val rootProject: Project) {
     val nodeModulesGradleCacheDir: File
         get() = rootPackageDir.resolve("packages_imported")
 
-    internal val environment: NodeJsEnv
-        get() {
-            val platform = NodeJsPlatform.name
-            val architecture = NodeJsPlatform.architecture
+    internal val environment: NodeJsEnv by lazy {
+        built = true
 
-            val nodeDirName = "node-v$nodeVersion-$platform-$architecture"
-            val nodeDir = cleanableStore[nodeDirName].use()
-            val isWindows = NodeJsPlatform.name == NodeJsPlatform.WIN
-            val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")
+        val platform = NodeJsPlatform.name
+        val architecture = NodeJsPlatform.architecture
 
-            fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
-                val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
-                return if (download) File(nodeBinDir, finalCommand).absolutePath else finalCommand
-            }
+        val nodeDirName = "node-v$nodeVersion-$platform-$architecture"
+        val nodeDir = CleanableStore[installationDir.absolutePath][nodeDirName].use()
+        val isWindows = NodeJsPlatform.name == NodeJsPlatform.WIN
+        val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")
 
-            fun getIvyDependency(): String {
-                val type = if (isWindows) "zip" else "tar.gz"
-                return "org.nodejs:node:$nodeVersion:$platform-$architecture@$type"
-            }
-
-            return NodeJsEnv(
-                nodeDir = nodeDir,
-                nodeBinDir = nodeBinDir,
-                nodeExecutable = getExecutable("node", nodeCommand, "exe"),
-                platformName = platform,
-                architectureName = architecture,
-                ivyDependency = getIvyDependency()
-            )
+        fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
+            val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
+            return if (download) File(nodeBinDir, finalCommand).absolutePath else finalCommand
         }
+
+        fun getIvyDependency(): String {
+            val type = if (isWindows) "zip" else "tar.gz"
+            return "org.nodejs:node:$nodeVersion:$platform-$architecture@$type"
+        }
+
+        NodeJsEnv(
+            nodeDir = nodeDir,
+            nodeBinDir = nodeBinDir,
+            nodeExecutable = getExecutable("node", nodeCommand, "exe"),
+            platformName = platform,
+            architectureName = architecture,
+            ivyDependency = getIvyDependency()
+        )
+    }
 
     internal fun executeSetup() {
         val nodeJsEnv = environment
