@@ -7,12 +7,12 @@ package org.jetbrains.kotlin.gradle.internal
 
 import kotlin.reflect.KProperty
 
-abstract class ConfigurationPhaseAware<C: Any> {
+abstract class ConfigurationPhaseAware<C : Any> {
 
     private var configured: C? = null
 
     @Synchronized
-    public fun requireConfigured(): C {
+    fun requireConfigured(): C {
         if (configured == null) {
             configured = finalizeConfiguration()
         }

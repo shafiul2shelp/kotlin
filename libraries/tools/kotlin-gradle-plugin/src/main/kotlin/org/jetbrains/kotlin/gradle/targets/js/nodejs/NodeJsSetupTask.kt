@@ -12,7 +12,7 @@ import java.net.URI
 
 open class NodeJsSetupTask : DefaultTask() {
     private val settings get() = NodeJsRootPlugin.apply(project.rootProject)
-    private val env by lazy { settings.environment }
+    private val env by lazy { settings.requireConfigured() }
 
     val ivyDependency: String
         @Input get() = env.ivyDependency

@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 
-open class YarnRootExtension(val project: Project) : ConfigurationPhaseAware() {
+open class YarnRootExtension(val project: Project) : ConfigurationPhaseAware<YarnEnv>() {
     init {
         check(project == project.rootProject)
     }
@@ -33,21 +33,20 @@ open class YarnRootExtension(val project: Project) : ConfigurationPhaseAware() {
     val useWorkspaces: Boolean
         get() = !disableWorkspaces
 
-    internal lateinit var environment: YarnEnv
+    override fun finalizeConfiguration(): YarnEnv {
+        val cleanableStore = CleanableStore[installationDir.path]
 
-    override fun finalizeConfiguration() {
-        super.finalizeConfiguration()
-
-        environment = YarnEnv(
+        return YarnEnv(
             downloadUrl = "$downloadBaseUrl/v$version/yarn-v$version.tar.gz",
-            home = CleanableStore[installationDir.path]["yarn-v$version"].use()
+            cleanableStore = cleanableStore,
+            home = cleanableStore["yarn-v$version"].use()
         )
     }
 
     internal fun executeSetup() {
         NodeJsRootPlugin.apply(project).executeSetup()
 
-        if (!environment.home.isDirectory) {
+        if (!finalizeConfiguration().home.isDirectory) {
             yarnSetupTask.setup()
         }
     }

@@ -25,7 +25,7 @@ open class YarnPlugin : Plugin<Project> {
         }
 
         tasks.create("yarn" + CleanDataTask.NAME_SUFFIX, CleanDataTask::class.java) {
-            it.cleanableStore = yarnRootExtension.cleanableStore
+            it.cleanableStore = yarnRootExtension.requireConfigured().cleanableStore
             it.description = "Clean unused local yarn version"
         }
     }
