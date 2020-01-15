@@ -801,6 +801,11 @@ public class IrTextTestCaseGenerated extends AbstractIrTextTestCase {
             runTest("compiler/testData/ir/irText/expressions/callableReferenceTypeArguments.kt");
         }
 
+        @TestMetadata("callableReferenceWithArgumentsConversion.kt")
+        public void testCallableReferenceWithArgumentsConversion() throws Exception {
+            runTest("compiler/testData/ir/irText/expressions/callableReferenceWithArgumentsConversion.kt");
+        }
+
         @TestMetadata("calls.kt")
         public void testCalls() throws Exception {
             runTest("compiler/testData/ir/irText/expressions/calls.kt");
