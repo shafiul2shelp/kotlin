@@ -9,21 +9,20 @@ import org.gradle.util.GFileUtils
 import java.io.File
 
 interface DownloadedFile {
-    val file: File
+    fun use(): File
 
     fun resolve(fileName: String): DownloadedFile
 }
 
-private fun use(file: File, dir: File): File {
-    if (dir.exists()) {
-        GFileUtils.touchExisting(dir)
+private fun use(file: File, root: File): File {
+    if (root.exists()) {
+        GFileUtils.touchExisting(root)
     }
     return file
 }
 
-internal class DownloadedFileImpl( private val _file: File) : DownloadedFile {
-    override val file: File
-        get(): File = use(_file, dir)
+internal class DownloadedFileImpl(private val _file: File) : DownloadedFile {
+    override fun use(): File = use(_file, dir)
 
     private var dir: File = _file
 
@@ -32,7 +31,7 @@ internal class DownloadedFileImpl( private val _file: File) : DownloadedFile {
     }
 
     override fun resolve(fileName: String): DownloadedFile {
-        return DownloadedFileImpl(file.resolve(fileName), dir)
+        return DownloadedFileImpl(_file.resolve(fileName), dir)
     }
 
 }

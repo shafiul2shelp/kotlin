@@ -37,7 +37,7 @@ open class YarnRootExtension(val project: Project) {
         NodeJsRootPlugin.apply(project).executeSetup()
 
         val env = environment
-        if (!env.home.file.isDirectory) {
+        if (!env.home.use().isDirectory) {
             yarnSetupTask.setup()
         }
     }

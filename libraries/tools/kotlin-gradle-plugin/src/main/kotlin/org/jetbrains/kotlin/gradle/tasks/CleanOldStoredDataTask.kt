@@ -28,7 +28,7 @@ class CleanOldStoredDataTask : DefaultTask() {
     fun exec() {
         val expirationDate = Instant.now().minus(Duration.ofDays(timeToLiveInDays))
 
-        CleanableStore.getStores().forEach { (_, store) -> store.cleanDir(expirationDate) }
+        CleanableStore.stores.forEach { (_, store) -> store.cleanDir(expirationDate) }
 
     }
 

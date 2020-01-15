@@ -73,7 +73,7 @@ open class NodeJsRootExtension(val rootProject: Project) {
 
             fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
                 val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
-                return if (download) File(nodeBinDir.file, finalCommand).absolutePath else finalCommand
+                return if (download) File(nodeBinDir.use(), finalCommand).absolutePath else finalCommand
             }
 
             fun getIvyDependency(): String {
@@ -94,7 +94,7 @@ open class NodeJsRootExtension(val rootProject: Project) {
     internal fun executeSetup() {
         val nodeJsEnv = environment
         if (download) {
-            if (!nodeJsEnv.nodeBinDir.file.isDirectory) {
+            if (!nodeJsEnv.nodeBinDir.use().isDirectory) {
                 nodeJsSetupTask.exec()
             }
         }
