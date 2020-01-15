@@ -5,33 +5,20 @@
 
 package org.jetbrains.kotlin.gradle.tasks.internal
 
-import org.gradle.util.GFileUtils
 import java.io.File
 
-interface DownloadedFile {
-    fun use(): File
-
-    fun resolve(fileName: String): DownloadedFile
-}
-
-private fun use(file: File, root: File): File {
-    if (root.exists()) {
-        GFileUtils.touchExisting(root)
-    }
-    return file
-}
-
-internal class DownloadedFileImpl(private val _file: File) : DownloadedFile {
-    override fun use(): File = use(_file, dir)
-
-    private var dir: File = _file
-
-    private constructor( _file: File, _dir: File) : this(_file) {
-        this.dir = _dir
+/**
+ * Wrapper around [File] to be able to mark [store] storage as used by calling [use]`()`.
+ */
+class DownloadedFile internal constructor(
+    private val store: CleanableStore,
+    private val file: File
+) {
+    fun use(): File {
+        store.markUsed()
+        return file
     }
 
-    override fun resolve(fileName: String): DownloadedFile {
-        return DownloadedFileImpl(_file.resolve(fileName), dir)
-    }
-
+    fun resolve(fileName: String): DownloadedFile =
+        DownloadedFile(store, file.resolve(fileName))
 }
