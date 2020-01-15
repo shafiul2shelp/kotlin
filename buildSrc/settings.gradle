@@ -28,7 +28,7 @@ def buildProperties = BuildPropertiesKt.getKotlinBuildPropertiesForSettings(sett
 
 BuildCacheKt.setupBuildCache(settings)
 
-def projectVersions = file("../gradle/projectVersions.properties").text
+def projectVersions = file("../gradle/versions.properties").text
 
 include "prepare-deps"
 
