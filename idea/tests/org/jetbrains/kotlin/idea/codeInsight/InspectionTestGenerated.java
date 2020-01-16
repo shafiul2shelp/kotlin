@@ -373,6 +373,11 @@ public class InspectionTestGenerated extends AbstractInspectionTest {
             runTest("idea/testData/inspections/suspiciousEqualsCombination/inspectionData/inspections.test");
         }
 
+        @TestMetadata("trailingComma/inspectionData/inspections.test")
+        public void testTrailingComma_inspectionData_Inspections_test() throws Exception {
+            runTest("idea/testData/inspections/trailingComma/inspectionData/inspections.test");
+        }
+
         @TestMetadata("twoSetOfTypeparameters/inspectionData/inspections.test")
         public void testTwoSetOfTypeparameters_inspectionData_Inspections_test() throws Exception {
             runTest("idea/testData/inspections/twoSetOfTypeparameters/inspectionData/inspections.test");

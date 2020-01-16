@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.idea.formatter
 
+import com.intellij.application.options.CodeStyle
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.TextRange
@@ -48,7 +49,11 @@ class TrailingCommaPostFormatProcessor : PostFormatProcessor {
                 null
         }?.toList().orEmpty()
 
-        fun needComma(commaOwner: KtElement, settings: CodeStyleSettings, checkExistingTrailingComma: Boolean = true): Boolean = when {
+        fun needComma(
+            commaOwner: KtElement,
+            settings: CodeStyleSettings = CodeStyle.getSettings(commaOwner.project),
+            checkExistingTrailingComma: Boolean = true
+        ): Boolean = when {
             commaOwner is KtWhenEntry ->
                 commaOwner.needTrailingComma(settings, checkExistingTrailingComma)
 
@@ -186,8 +191,11 @@ private val PsiElement.lastSignificantChild: PsiElement?
         else -> lastChild
     }
 
-fun PsiElement.leafIgnoringWhitespace(forward: Boolean = true) = leaf(forward) { it !is PsiWhiteSpace }
-fun PsiElement.leafIgnoringWhitespaceAndComments(forward: Boolean = true) = leaf(forward) { it !is PsiWhiteSpace && it !is PsiComment }
+fun PsiElement.leafIgnoringWhitespace(forward: Boolean = true, skipEmptyElements: Boolean = true) =
+    leaf(forward) { (!skipEmptyElements || it.textLength != 0) && it !is PsiWhiteSpace }
+
+fun PsiElement.leafIgnoringWhitespaceAndComments(forward: Boolean = true, skipEmptyElements: Boolean = true) =
+    leaf(forward) { (!skipEmptyElements || it.textLength != 0) && it !is PsiWhiteSpace && it !is PsiComment }
 
 fun PsiElement.leaf(forward: Boolean = true, filter: (PsiElement) -> Boolean): PsiElement? =
     if (forward) nextLeaf(filter)

@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.idea.inspections
 
 import com.google.common.collect.Lists
+import com.intellij.application.options.CodeStyle
 import com.intellij.codeHighlighting.HighlightDisplayLevel
 import com.intellij.codeHighlighting.Pass
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType
